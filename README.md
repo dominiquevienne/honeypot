@@ -25,7 +25,7 @@ echo $oForm->honeypotInput();
 require __DIR__ . '/honeypot/src/Honeypot.php';
 require __DIR__ . '/honeypot/src/Form.php';
 
-$oForm  = new Dominiquevienne\Honeypot\Honeypot();
+$oForm  = new Dominiquevienne\Honeypot\Form();
 echo $oForm->honeypotInput();
 ```
 ### Laravel
@@ -36,7 +36,7 @@ composer require dominiquevienne/honeypot
 and add the following lines in your class
 ```php
 <?php
-use \Dominiquevienne\Honeypot\Honeypot;
+use \Dominiquevienne\Honeypot\Form;
 
 class yourController {
   public function show() {
@@ -46,3 +46,69 @@ class yourController {
   }
 }
 ```
+## How it works
+Once the package is installed the honeypot consists in enabling two steps
+### Form rendering
+Where you will trigger Form::timeCheck() which will store date-time of the Form rendering and trigger Form::honeypotInput() used to return the honeypot form element. 
+
+Any of those two options are mandatory. 
+```php
+<?php
+$oForm          = new Dominiquevienne\Honeypot\Form();
+$oForm->timeCheck();
+$honeypotInput  = $oForm->honeypotInput();
+?>
+<html>
+<?php 
+// All your HTML code before your form
+?>
+<form action="yourLandingPage.php" method="post">
+<?php
+// The standard fields of your form
+echo $honeypotInput;
+?>
+<input type="submit"/>
+</html>
+```
+Be aware that you'll need to hide the honeypot field. To do that, you'll have three solutions
+- use CSS (default class is hide)
+- use jQuery.hide() or similar method (best solution because bot are mainly JS free)
+- remove the element from the DOM using JS
+### Form action page
+Before you do the real job in your script of the landing page of your form (`action` attribute of Form element), you will have to use this code
+```php
+<?php
+$oHoneypot  = new Dominiquevienne\Honeypot\Honeypot();
+$checks     = $oHoneypot->checks();
+if(!empty($checks)) {
+  die('Your are a spammer');
+}
+// your code
+```
+## Available configuration
+When you create the object, you have the ability to pass config values through an array. 
+```php
+<?php
+$config = [
+  'honeypotInputClass'  => 'myCssClass',
+  'honeypotInputNames'  => [
+    'name1',
+    'name2',
+  ],
+  'formMethod'          => 'GET',
+];
+$oForm  = new Dominiquevienne\Honeypot\Form($config);
+```
+### Form
+#### honeypotInputMask
+This is the mask used to render the input field. You can use Form::getHoneypotInputMask() to get the current value. 
+#### honeypotInputClass
+This is the CSS class used on the honeypot input field. 
+#### honeypotInputType
+This is the HTML type of the input field
+#### honeypotInputName
+Way to force a specific name
+#### honeypotInputNames
+Array containing a list in which honeypot will take a random name followed by a hash. 
+#### formMethod
+HTTP Method used to send the form
