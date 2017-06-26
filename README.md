@@ -112,3 +112,8 @@ Way to force a specific name
 Array containing a list in which honeypot will take a random name followed by a hash. 
 #### formMethod
 HTTP Method used to send the form
+### Honeypot
+#### minFormCompletionTime
+Time in seconds under which a form subscriber will be considered as a bot
+#### checks
+Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck']```
