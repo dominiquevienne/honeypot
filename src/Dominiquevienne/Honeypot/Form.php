@@ -229,7 +229,8 @@ class Form {
    */
   private function _generateHoneypotInput()
   {
-    if(empty($this->getHoneypotInputName())) {
+    $honepotInputName = $this->getHoneypotInputName();
+    if(empty($honepotInputName)) {
       $names  = $this->getHoneypotInputNames();
       $name   = $names[rand(0, count($names)-1)];
       $name   .= Helpers::generateRandomString(3);
