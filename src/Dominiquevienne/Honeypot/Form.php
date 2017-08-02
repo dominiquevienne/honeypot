@@ -28,7 +28,7 @@ class Form {
   ];
   private $_tokenInputClass             = 'hide';
   private $_tokenInputType              = 'text';
-  private $_tokenInputName              = null;
+  private $_tokenInputName              = 'honeypotToken';
   private $_method                      = 'POST';
   private $_tokenVarName                = 'honeypotToken';
 
