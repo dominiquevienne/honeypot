@@ -15,8 +15,16 @@ use Monolog\Handler\StreamHandler;
 class Honeypot {
 
   private $_minFormCompletionTime = 10;
-  private $_checks                = ['timeCheck','honeypotCheck'];
-  private $_availableChecks       = ['timeCheck','honeypotCheck'];
+  private $_checks                = [
+                                      'timeCheck',
+                                      'honeypotCheck',
+                                      'tokenCheck',
+                                    ];
+  private $_availableChecks       = [
+                                      'timeCheck',
+                                      'honeypotCheck',
+                                      'tokenCheck',
+                                    ];
   private $_logger;
   private $_logPath               = 'logs/honeypot.logs';
 
@@ -208,5 +216,50 @@ class Honeypot {
         return TRUE;
       }
     }
+  }
+
+
+  /**
+   * Checks if token is valid
+   *
+   * @return bool
+   */
+  public function tokenCheck()
+  {
+    $form         = new Form();
+    $method       = strtoupper($_SESSION[$form->getMethodSessionVarName()]);
+    $sessionToken = $_SESSION[$form->getTokenSessionVarName()];
+
+    if($method=='GET') {
+      if(($_GET[$form->getTokenInputName()]==$sessionToken) AND !empty($sessionToken)) {
+        $this->resetToken();
+        return TRUE;
+      } else {
+        $this->resetToken();
+        return FALSE;
+      }
+    } elseif($method=='POST') {
+      if(($_POST[$form->getTokenInputName()]==$sessionToken) AND !empty($sessionToken)) {
+        $this->resetToken();
+        return TRUE;
+      } else {
+        $this->resetToken();
+        return FALSE;
+      }
+    }
+    return FALSE;
+  }
+
+
+  /**
+   * Used to destroy token in session
+   *
+   * @return $this
+   */
+  private function resetToken() {
+    $form         = new Form();
+    $_SESSION[$form->getTokenSessionVarName()]  = null;
+
+    return $this;
   }
 }

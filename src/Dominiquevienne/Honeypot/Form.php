@@ -15,6 +15,7 @@ class Form {
   private $_methodSessionVarName        = 'honeypotMethod';
   private $_honeypotInputSessionVarName = 'honeypotInputName';
   private $_honeypotInputMask           = '<input class="[$honeypotInputClass]" type="[$honeypotInputType]" name="[$honeypotInputName]" autocomplete="off" value="" />';
+  private $_tokenInputMask              = '<input class="[$tokenInputClass]" type="[$tokenInputType]" name="[$tokenInputName]" autocomplete="off" value="[$tokenInputValue]" />';
   private $_honeypotInputClass          = 'hide';
   private $_honeypotInputType           = 'text';
   private $_honeypotInputName           = null;
@@ -25,7 +26,11 @@ class Form {
     'contactPerson',
     'completeName',
   ];
+  private $_tokenInputClass             = 'hide';
+  private $_tokenInputType              = 'text';
+  private $_tokenInputName              = null;
   private $_method                      = 'POST';
+  private $_tokenVarName                = 'honeypotToken';
 
 
 
@@ -190,6 +195,109 @@ class Form {
 
 
   /**
+   * Getter for tokenInputMask
+   *
+   * @return string
+   */
+  public function getTokenInputMask()
+  {
+    return $this->_tokenInputMask;
+  }
+
+
+  /**
+   * Setter for tokenInputMask
+   *
+   * @param $mask
+   *
+   * @return $this
+   */
+  public function setTokenInputMask($mask)
+  {
+    $this->_tokenInputMask = $mask;
+
+    return $this;
+  }
+
+
+  /**
+   * Getter for tokenInputClass
+   *
+   * @return string
+   */
+  public function getTokenInputClass()
+  {
+    return $this->_tokenInputClass;
+  }
+
+
+  /**
+   * Setter for tokenInputClass
+   *
+   * @param $class
+   *
+   * @return $this
+   */
+  public function setTokenInputClass($class)
+  {
+    $this->_tokenInputClass  = $class;
+
+    return $this;
+  }
+
+
+  /**
+   * Getter for tokenInputType
+   *
+   * @return string
+   */
+  public function getTokenInputType()
+  {
+    return $this->_tokenInputType;
+  }
+
+
+  /**
+   * Setter for tokenInputType
+   *
+   * @param $type
+   *
+   * @return $this
+   */
+  public function setTokenInputType($type)
+  {
+    $this->_tokenInputType = $type;
+
+    return $this;
+  }
+
+
+  /**
+   * Getter for tokenInputName
+   *
+   * @return null|string
+   */
+  public function getTokenInputName()
+  {
+    return $this->_tokenInputName;
+  }
+
+
+  /**
+   * Getter for tokenInputValue
+   *
+   * @return string
+   */
+  public function getTokenInputValue()
+  {
+    $token  = Helpers::generateRandomString(24);
+    $_SESSION[$this->getTokenSessionVarName()]  = $token;
+
+    return $token;
+  }
+
+
+  /**
    * Used to store current time in Session in order to measure form completion time
    */
   public function timeCheck()
@@ -225,12 +333,23 @@ class Form {
 
 
   /**
+   * Getter for Token var name in SESSION
+   *
+   * @return string
+   */
+  public function getTokenSessionVarName()
+  {
+    return $this->_tokenVarName;
+  }
+
+
+  /**
    * Will generate honeypotInput and save its name in Session
    */
   private function _generateHoneypotInput()
   {
-    $honepotInputName = $this->getHoneypotInputName();
-    if(empty($honepotInputName)) {
+    $honeypotInputName = $this->getHoneypotInputName();
+    if(empty($honeypotInputName)) {
       $names  = $this->getHoneypotInputNames();
       $name   = $names[rand(0, count($names)-1)];
       $name   .= Helpers::generateRandomString(3);
@@ -265,6 +384,32 @@ class Form {
     }
 
     return $input;
+  }
+
+  public function tokenInput()
+  {
+    $mask   = $this->getTokenInputMask();
+    $input  = preg_replace_callback(
+      '/\[\$([^\]]+)\]/si',
+      function($m) {
+        $functionName = 'get' . $m[1];
+        return $this->$functionName();
+      },
+      $mask
+    );
+
+    return $input;
+  }
+
+
+  /**
+   * Returns the different needed inputs
+   *
+   * @return mixed
+   */
+  public function inputs()
+  {
+    return $this->honeypotInput() . $this->tokenInput();
   }
 
 
