@@ -30,7 +30,7 @@ class Form {
   private $_tokenInputType              = 'text';
   private $_tokenInputName              = 'honeypotToken';
   private $_method                      = 'POST';
-  private $_tokenVarName                = 'honeypotToken';
+  private $_tokenSessionVarName         = 'honeypotToken';
 
 
 
@@ -339,7 +339,7 @@ class Form {
    */
   public function getTokenSessionVarName()
   {
-    return $this->_tokenVarName;
+    return $this->_tokenSessionVarName;
   }
 
 

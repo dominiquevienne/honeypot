@@ -13,7 +13,7 @@ Then create your application bootstrap using this kind of code
 require __DIR__ . '/vendor/autoload.php';
 
 $oForm  = new Dominiquevienne\Honeypot\Form();
-echo $oForm->honeypotInput();
+echo $oForm->inputs();
 ```
 ### Manual installation
 - Download latest stable release on [Github](https://github.com/dominiquevienne/honeypot/releases)
@@ -26,7 +26,7 @@ require __DIR__ . '/honeypot/src/Honeypot.php';
 require __DIR__ . '/honeypot/src/Form.php';
 
 $oForm  = new Dominiquevienne\Honeypot\Form();
-echo $oForm->honeypotInput();
+echo $oForm->inputs();
 ```
 ### Laravel
 Using honeypot in Laravel is as simple as a
@@ -42,7 +42,7 @@ class yourController {
   public function show() {
     /** some code of yours */
     $oForm  = new Form();
-    return $oForm->honeypotInput();
+    return $oForm->inputs();
   }
 }
 ```
@@ -56,7 +56,7 @@ Any of those two options are mandatory.
 <?php
 $oForm          = new Dominiquevienne\Honeypot\Form();
 $oForm->timeCheck();
-$honeypotInput  = $oForm->honeypotInput();
+$honeypotInputs = $oForm->inputs();
 ?>
 <html>
 <?php 
@@ -65,7 +65,7 @@ $honeypotInput  = $oForm->honeypotInput();
 <form action="yourLandingPage.php" method="post">
 <?php
 // The standard fields of your form
-echo $honeypotInput;
+echo $honeypotInputs;
 ?>
 <input type="submit"/>
 </html>
@@ -116,4 +116,4 @@ HTTP Method used to send the form
 #### minFormCompletionTime
 Time in seconds under which a form subscriber will be considered as a bot
 #### checks
-Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck']```
+Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck','tokenCheck']```
