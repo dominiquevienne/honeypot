@@ -32,6 +32,7 @@ class Form {
   private $_method                        = 'POST';
   private $_tokenSessionVarName           = 'honeypotToken';
   private $_failureAttemptsSessionVarname = 'honeypotFailureAttempts';
+  private $_attemptsSessionVarname        = 'honeypotAttempts';
 
 
 
@@ -346,6 +347,7 @@ class Form {
 
   /**
    * Getter for failure attempts var name in SESSION
+   *
    * @return string
    */
   public function getFailureAttemptsSessionVarName()
@@ -355,7 +357,18 @@ class Form {
 
 
   /**
-   * Will generate honeypotInput and save its name in Session
+   * Getter for attempts var name in SESSION
+   *
+   * @return string
+   */
+  public function getAttemptsSessionVarName()
+  {
+    return $this->_attemptsSessionVarname;
+  }
+
+
+  /**
+   * Will generate honeypotInput and save its name in SESSION
    */
   private function _generateHoneypotInput()
   {
@@ -420,6 +433,8 @@ class Form {
    */
   public function inputs()
   {
+    $this->_increaseAttemptsCounter();
+
     return $this->honeypotInput() . $this->tokenInput();
   }
 
@@ -469,4 +484,20 @@ class Form {
     return $this;
   }
 
+
+  /**
+   * Increase attempts counter
+   *
+   * @return $this
+   */
+  private function _increaseAttemptsCounter()
+  {
+    if(empty($_SESSION[$this->getAttemptsSessionVarName()])) {
+      $_SESSION[$this->getAttemptsSessionVarName()] = 1;
+    } else {
+      $_SESSION[$this->getAttemptsSessionVarName()]++;
+    }
+
+    return $this;
+  }
 }

@@ -117,5 +117,7 @@ HTTP Method used to send the form
 Time in seconds under which a form subscriber will be considered as a bot
 #### maxFailureAttempts
 Quantity of accepted failures per session before considered as a bot. When the number is reached and failureCheck is ON, every attempt will be considered as a failure during all the session lifetime. 
+#### maxAttempts
+Quantity of accepted attempts per session before considered as a bot. When the number is reached and quantityCheck is ON, every attempt will be considered as a failure during all the session lifetime. 
 #### checks
-Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck','tokenCheck','failureCheck']```
+Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck','tokenCheck','failureCheck','quantityCheck']```

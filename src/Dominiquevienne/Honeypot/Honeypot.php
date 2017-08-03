@@ -16,17 +16,20 @@ class Honeypot {
 
   private $_minFormCompletionTime = 10;
   private $_maxFailureAttempts    = 3;
+  private $_maxAttempts           = 10;
   private $_checks                = [
                                       'timeCheck',
                                       'honeypotCheck',
                                       'tokenCheck',
                                       'failureCheck',
+                                      'quantityCheck',
                                     ];
   private $_availableChecks       = [
                                       'timeCheck',
                                       'honeypotCheck',
                                       'tokenCheck',
                                       'failureCheck',
+                                      'quantityCheck',
                                     ];
   private $_logger;
   private $_logPath               = 'logs/honeypot.logs';
@@ -45,6 +48,10 @@ class Honeypot {
 
     if(!empty($config['maxFailureAttempts']) AND is_int($config['maxFailureAttempts'])) {
       $this->setMaxFailureAttempts($config['maxFailureAttempts']);
+    }
+
+    if(!empty($config['maxAttempts']) AND is_int($config['maxAttempts'])) {
+      $this->setMaxAttempts($config['maxAttempts']);
     }
 
     if(!empty($config['checks'])) {
@@ -108,6 +115,36 @@ class Honeypot {
   {
     if(is_int($attempts)) {
       $this->_maxFailureAttempts  = $attempts;
+
+      return $this;
+    } else {
+      return FALSE;
+    }
+  }
+
+
+  /**
+   * Getter for maxAttempts
+   *
+   * @return int
+   */
+  public function getMaxAttempts()
+  {
+    return $this->_maxAttempts;
+  }
+
+
+  /**
+   * Setter for maxAttempts
+   *
+   * @param $attempts
+   *
+   * @return $this|bool
+   */
+  public function setMaxAttempts($attempts)
+  {
+    if(is_int($attempts)) {
+      $this->_maxAttempts = $attempts;
 
       return $this;
     } else {
@@ -318,6 +355,18 @@ class Honeypot {
   {
     $oForm  = new Form();
     if($_SESSION[$oForm->getFailureAttemptsSessionVarName()]>$this->getMaxFailureAttempts()) {
+      return FALSE;
+    } else {
+      return TRUE;
+    }
+  }
+
+
+  public function quantityCheck()
+  {
+    $oForm  = new Form();
+    if($_SESSION[$oForm->getAttemptsSessionVarName()]>$s) {
+      $this->_increaseFailureCounter();
       return FALSE;
     } else {
       return TRUE;
