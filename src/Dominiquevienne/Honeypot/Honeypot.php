@@ -362,10 +362,15 @@ class Honeypot {
   }
 
 
+  /**
+   * Checks maximum attempts per session
+   *
+   * @return bool
+   */
   public function quantityCheck()
   {
     $oForm  = new Form();
-    if($_SESSION[$oForm->getAttemptsSessionVarName()]>$s) {
+    if($_SESSION[$oForm->getAttemptsSessionVarName()]>$this->getMaxAttempts()) {
       $this->_increaseFailureCounter();
       return FALSE;
     } else {
