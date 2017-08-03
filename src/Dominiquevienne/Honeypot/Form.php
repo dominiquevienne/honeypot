@@ -26,11 +26,12 @@ class Form {
     'contactPerson',
     'completeName',
   ];
-  private $_tokenInputClass             = 'hide';
-  private $_tokenInputType              = 'text';
-  private $_tokenInputName              = 'honeypotToken';
-  private $_method                      = 'POST';
-  private $_tokenSessionVarName         = 'honeypotToken';
+  private $_tokenInputClass               = 'hide';
+  private $_tokenInputType                = 'text';
+  private $_tokenInputName                = 'honeypotToken';
+  private $_method                        = 'POST';
+  private $_tokenSessionVarName           = 'honeypotToken';
+  private $_failureAttemptsSessionVarname = 'honeypotFailureAttempts';
 
 
 
@@ -340,6 +341,16 @@ class Form {
   public function getTokenSessionVarName()
   {
     return $this->_tokenSessionVarName;
+  }
+
+
+  /**
+   * Getter for failure attempts var name in SESSION
+   * @return string
+   */
+  public function getFailureAttemptsSessionVarName()
+  {
+    return $this->_failureAttemptsSessionVarname;
   }
 
 

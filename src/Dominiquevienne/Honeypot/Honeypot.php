@@ -15,18 +15,22 @@ use Monolog\Handler\StreamHandler;
 class Honeypot {
 
   private $_minFormCompletionTime = 10;
+  private $_maxFailureAttempts    = 3;
   private $_checks                = [
                                       'timeCheck',
                                       'honeypotCheck',
                                       'tokenCheck',
+                                      'failureCheck',
                                     ];
   private $_availableChecks       = [
                                       'timeCheck',
                                       'honeypotCheck',
                                       'tokenCheck',
+                                      'failureCheck',
                                     ];
   private $_logger;
   private $_logPath               = 'logs/honeypot.logs';
+
 
 
   public function __construct($config = [])
@@ -38,6 +42,11 @@ class Honeypot {
     if(!empty($config['minFormCompletionTime']) AND is_int($config['minFormCompletionTime'])) {
       $this->setMinFormCompletionTime($config['minFormCompletionTime']);
     }
+
+    if(!empty($config['maxFailureAttempts']) AND is_int($config['maxFailureAttempts'])) {
+      $this->setMaxFailureAttempts($config['maxFailureAttempts']);
+    }
+
     if(!empty($config['checks'])) {
       $this->setChecks($config['checks']);
     }
@@ -69,6 +78,36 @@ class Honeypot {
   {
     if(is_int($time)) {
       $this->_minFormCompletionTime = $time;
+
+      return $this;
+    } else {
+      return FALSE;
+    }
+  }
+
+
+  /**
+   * Getter for maxFailureAttempts
+   *
+   * @return int
+   */
+  public function getMaxFailureAttempts()
+  {
+    return $this->_maxFailureAttempts;
+  }
+
+
+  /**
+   * Setter for maxFailureAttempts
+   *
+   * @param $attempts
+   *
+   * @return $this|bool
+   */
+  public function setMaxFailureAttempts($attempts)
+  {
+    if(is_int($attempts)) {
+      $this->_maxFailureAttempts  = $attempts;
 
       return $this;
     } else {
@@ -184,6 +223,7 @@ class Honeypot {
     $now  = time();
 
     if(($_SESSION[$form->getTimeCheckSessionVarName()]+$this->getMinFormCompletionTime())>$now) {
+      $this->_increaseFailureCounter();
       return FALSE;
     } else {
       return TRUE;
@@ -205,12 +245,14 @@ class Honeypot {
 
     if($method=='GET') {
       if(!empty($_GET[$inputName])) {
+        $this->_increaseFailureCounter();
         return FALSE;
       } else {
         return TRUE;
       }
     } elseif($method=='POST') {
       if(!empty($_POST[$inputName])) {
+        $this->_increaseFailureCounter();
         return FALSE;
       } else {
         return TRUE;
@@ -232,21 +274,24 @@ class Honeypot {
 
     if($method=='GET') {
       if(($_GET[$form->getTokenInputName()]==$sessionToken) AND !empty($sessionToken)) {
-        $this->resetToken();
+        $this->_resetToken();
         return TRUE;
       } else {
-        $this->resetToken();
+        $this->_resetToken();
+        $this->_increaseFailureCounter();
         return FALSE;
       }
     } elseif($method=='POST') {
       if(($_POST[$form->getTokenInputName()]==$sessionToken) AND !empty($sessionToken)) {
-        $this->resetToken();
+        $this->_resetToken();
         return TRUE;
       } else {
-        $this->resetToken();
+        $this->_resetToken();
+        $this->_increaseFailureCounter();
         return FALSE;
       }
     }
+    $this->_increaseFailureCounter();
     return FALSE;
   }
 
@@ -256,9 +301,44 @@ class Honeypot {
    *
    * @return $this
    */
-  private function resetToken() {
+  private function _resetToken() {
     $form         = new Form();
     $_SESSION[$form->getTokenSessionVarName()]  = null;
+
+    return $this;
+  }
+
+
+  /**
+   * Checks maximum failed attempts per session
+   *
+   * @return bool
+   */
+  public function failureCheck()
+  {
+    $oForm  = new Form();
+    if($_SESSION[$oForm->getFailureAttemptsSessionVarName()]>$this->getMaxFailureAttempts()) {
+      return FALSE;
+    } else {
+      return TRUE;
+    }
+  }
+
+
+  /**
+   * Used to increase failure counter
+   *
+   * @return $this
+   */
+  private function _increaseFailureCounter()
+  {
+    $oForm    = new Form();
+
+    if(!empty($_SESSION[$oForm->getFailureAttemptsSessionVarName()])) {
+      $_SESSION[$oForm->getFailureAttemptsSessionVarName()]++;
+    } else {
+      $_SESSION[$oForm->getFailureAttemptsSessionVarName()] = 1;
+    }
 
     return $this;
   }
