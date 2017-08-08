@@ -407,6 +407,8 @@ class Form {
       $this->_registerMethod();
     }
 
+    $input  = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
+
     return $input;
   }
 
@@ -435,7 +437,9 @@ class Form {
   {
     $this->_increaseAttemptsCounter();
 
-    return $this->honeypotInput() . $this->tokenInput();
+    return $this->honeypotInput() .
+      $this->tokenInput() .
+      $this->getHoneypotScript();
   }
 
 
@@ -499,5 +503,22 @@ class Form {
     }
 
     return $this;
+  }
+
+
+  /**
+   * Generates the Javascript needed for frontend honeypot field removal
+   *
+   * @return string
+   */
+  public function getHoneypotScript()
+  {
+    $script = '<script>var t = document.getElementById("' . $this->getHoneypotInputName() . '_outer");' .
+      'if (t) { ' .
+      't.parentNode.removeChild(t); ' .
+      '} ' .
+      '</script>';
+
+    return $script;
   }
 }
