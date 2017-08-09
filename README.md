@@ -72,8 +72,7 @@ echo $honeypotInputs;
 ```
 Be aware that you'll need to hide the honeypot field. To do that, you'll have three solutions
 - use CSS (default class is hide)
-- use jQuery.hide() or similar method (best solution because bot are mainly JS free)
-- remove the element from the DOM using JS
+- remove the element from the DOM using JS (Pure Javascript, jQuery or other). This is already done by using default function ``$oForm->inputs()`` or by using ``$oForm->getHoneypotScript()`` which would return a script in pure javascript that would remove the honeypot field from the DOM. 
 ### Form action page
 Before you do the real job in your script of the landing page of your form (`action` attribute of Form element), you will have to use this code
 ```php
