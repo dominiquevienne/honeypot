@@ -354,6 +354,9 @@ class Honeypot {
   public function failureCheck()
   {
     $oForm  = new Form();
+    if(empty($_SESSION[$oForm->getFailureAttemptsSessionVarName()])) {
+      $_SESSION[$oForm->getFailureAttemptsSessionVarName()] = 0;
+    }
     if($_SESSION[$oForm->getFailureAttemptsSessionVarName()]>$this->getMaxFailureAttempts()) {
       return FALSE;
     } else {
@@ -374,9 +377,6 @@ class Honeypot {
       $this->_increaseFailureCounter();
       return FALSE;
     } else {
-      if(empty($_SESSION[$oForm->getFailureAttemptsSessionVarName()])) {
-        $_SESSION[$oForm->getFailureAttemptsSessionVarName()] = 0;
-      }
       return TRUE;
     }
   }
