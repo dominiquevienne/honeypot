@@ -374,6 +374,9 @@ class Honeypot {
       $this->_increaseFailureCounter();
       return FALSE;
     } else {
+      if(empty($_SESSION[$oForm->getFailureAttemptsSessionVarName()])) {
+        $_SESSION[$oForm->getFailureAttemptsSessionVarName()] = 0;
+      }
       return TRUE;
     }
   }
