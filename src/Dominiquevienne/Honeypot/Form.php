@@ -27,7 +27,7 @@ class Form {
     'completeName',
   ];
   private $_tokenInputClass               = 'hide';
-  private $_tokenInputType                = 'text';
+  private $_tokenInputType                = 'hidden';
   private $_tokenInputName                = 'honeypotToken';
   private $_method                        = 'POST';
   private $_tokenSessionVarName           = 'honeypotToken';
@@ -59,6 +59,9 @@ class Form {
       }
       if(!empty($config['formMethod'])) {
         $this->setFormMethod($config['formMethod']);
+      }
+      if(!empty($config['tokenInputType'])) {
+        $this->setTokenInputType($config['tokenInputType']);
       }
     }
   }
