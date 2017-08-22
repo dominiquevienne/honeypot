@@ -64,6 +64,9 @@ class Form {
       if(!empty($config['tokenInputType'])) {
         $this->setTokenInputType($config['tokenInputType']);
       }
+      if(!empty($config['drupalForm'])) {
+        $this->setDrupalForm($config['drupalForm']);
+      }
     }
   }
 
@@ -458,15 +461,27 @@ class Form {
 
   public function tokenInput()
   {
-    $mask   = $this->getTokenInputMask();
-    $input  = preg_replace_callback(
-      '/\[\$([^\]]+)\]/si',
-      function($m) {
-        $functionName = 'get' . $m[1];
-        return $this->$functionName();
-      },
-      $mask
-    );
+    if(empty($this->getDrupalForm())) {
+      $mask = $this->getTokenInputMask();
+      $input = preg_replace_callback(
+        '/\[\$([^\]]+)\]/si',
+        function ($m) {
+          $functionName = 'get' . $m[1];
+          return $this->$functionName();
+        },
+        $mask
+      );
+    } else {
+      $input[$this->getTokenInputName()]  = [
+        '#type'         => $this->getTokenInputType(),
+        '#value'        => $this->getTokenInputValue(),
+        '#attributes'   => [
+          'id'            => $this->getTokenInputName(),
+          'class'         => $this->getTokenInputClass(),
+          'autocomplete'  => 'off',
+        ],
+      ];
+    }
 
     return $input;
   }
@@ -486,7 +501,8 @@ class Form {
         $this->tokenInput() .
         $this->getHoneypotScript();
     } else {
-      $inputs = $this->honeypotInput();
+      //      $inputs = $this->honeypotInput() + $this->tokenInput() + $this->getHoneypotScript();
+      $inputs = $this->honeypotInput() + $this->tokenInput();
     }
     return $inputs;
   }
@@ -567,6 +583,12 @@ class Form {
       't.parentNode.removeChild(t); ' .
       '} ' .
       '</script>';
+    if(!empty($this->getDrupalForm())) {
+      $script['honeypotScript'] = [
+        '#prefix'       => $script,
+        '#value'        => '',
+      ];
+    }
 
     return $script;
   }
