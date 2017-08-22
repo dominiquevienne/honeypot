@@ -33,6 +33,7 @@ class Form {
   private $_tokenSessionVarName           = 'honeypotToken';
   private $_failureAttemptsSessionVarname = 'honeypotFailureAttempts';
   private $_attemptsSessionVarname        = 'honeypotAttempts';
+  private $_drupalForm                    = FALSE;
 
 
 
@@ -62,6 +63,9 @@ class Form {
       }
       if(!empty($config['tokenInputType'])) {
         $this->setTokenInputType($config['tokenInputType']);
+      }
+      if(!empty($config['drupalForm'])) {
+        $this->setDrupalForm($config['drupalForm']);
       }
     }
   }
@@ -289,6 +293,34 @@ class Form {
 
 
   /**
+   * DrupalForm setter
+   *
+   * @param $isDrupal
+   *
+   * @return $this
+   */
+  public function setDrupalForm($isDrupal)
+  {
+    if(is_bool($isDrupal)) {
+      $this->_drupalForm  = $isDrupal;
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * DrupalForm getter
+   *
+   * @return bool
+   */
+  public function getDrupalForm()
+  {
+    return $this->_drupalForm;
+  }
+
+
+  /**
    * Getter for tokenInputValue
    *
    * @return string
@@ -396,36 +428,64 @@ class Form {
   {
     $this->_generateHoneypotInput();
 
-    $mask   = $this->getHoneypotInputMask();
-    $input  = preg_replace_callback(
-      '/\[\$([^\]]+)\]/si',
-      function($m) {
-        $functionName = 'get' . $m[1];
-        return $this->$functionName();
-      },
-      $mask
-    );
+    if(empty($this->getDrupalForm())) {
+      $mask = $this->getHoneypotInputMask();
+      $input = preg_replace_callback(
+        '/\[\$([^\]]+)\]/si',
+        function ($m) {
+          $functionName = 'get' . $m[1];
+          return $this->$functionName();
+        },
+        $mask
+      );
 
-    if(empty($_SESSION[$this->getMethodSessionVarName()])) {
-      $this->_registerMethod();
+      $input = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
+    } else {
+      $type = $this->getHoneypotInputType();
+      $type = $this->_drupalType($type);
+      $input[$this->getHoneypotInputName()] = [
+        '#type'         => $type,
+        '#value'        => '',
+        '#attributes'   => [
+          'id'            => $this->getHoneypotInputName(),
+          'class'         => $this->getHoneypotInputClass(),
+          'autocomplete'  => 'off',
+        ],
+      ];
     }
 
-    $input  = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
+    if (empty($_SESSION[$this->getMethodSessionVarName()])) {
+      $this->_registerMethod();
+    }
 
     return $input;
   }
 
   public function tokenInput()
   {
-    $mask   = $this->getTokenInputMask();
-    $input  = preg_replace_callback(
-      '/\[\$([^\]]+)\]/si',
-      function($m) {
-        $functionName = 'get' . $m[1];
-        return $this->$functionName();
-      },
-      $mask
-    );
+    if(empty($this->getDrupalForm())) {
+      $mask = $this->getTokenInputMask();
+      $input = preg_replace_callback(
+        '/\[\$([^\]]+)\]/si',
+        function ($m) {
+          $functionName = 'get' . $m[1];
+          return $this->$functionName();
+        },
+        $mask
+      );
+    } else {
+      $type = $this->getTokenInputType();
+      $type = $this->_drupalType($type);
+      $input[$this->getTokenInputName()]  = [
+        '#type'         => $type,
+        '#value'        => $this->getTokenInputValue(),
+        '#attributes'   => [
+          'id'            => $this->getTokenInputName(),
+          'class'         => $this->getTokenInputClass(),
+          'autocomplete'  => 'off',
+        ],
+      ];
+    }
 
     return $input;
   }
@@ -440,9 +500,15 @@ class Form {
   {
     $this->_increaseAttemptsCounter();
 
-    return $this->honeypotInput() .
-      $this->tokenInput() .
-      $this->getHoneypotScript();
+    if(empty($this->getDrupalForm())) {
+      $inputs = $this->honeypotInput() .
+        $this->tokenInput() .
+        $this->getHoneypotScript();
+    } else {
+      $inputs = $this->honeypotInput() + $this->tokenInput();
+    }
+
+    return $inputs;
   }
 
 
@@ -523,5 +589,22 @@ class Form {
       '</script>';
 
     return $script;
+  }
+
+
+  /**
+   * Converts HTML Form types to Drupal Form Types
+   *
+   * @param $type
+   *
+   * @return string
+   */
+  protected function _drupalType($type)
+  {
+    if($type == 'text') {
+      $type = 'textfield';
+    }
+
+    return $type;
   }
 }
