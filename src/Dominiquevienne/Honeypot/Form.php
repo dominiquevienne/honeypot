@@ -33,6 +33,7 @@ class Form {
   private $_tokenSessionVarName           = 'honeypotToken';
   private $_failureAttemptsSessionVarname = 'honeypotFailureAttempts';
   private $_attemptsSessionVarname        = 'honeypotAttempts';
+  private $_drupalForm                    = FALSE;
 
 
 
@@ -289,6 +290,34 @@ class Form {
 
 
   /**
+   * DrupalForm setter
+   *
+   * @param $isDrupal
+   *
+   * @return $this
+   */
+  public function setDrupalForm($isDrupal)
+  {
+    if(is_bool($isDrupal)) {
+      $this->_drupalForm  = $isDrupal;
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * DrupalForm getter
+   *
+   * @return bool
+   */
+  public function getDrupalForm()
+  {
+    return $this->_drupalForm;
+  }
+
+
+  /**
    * Getter for tokenInputValue
    *
    * @return string
@@ -396,21 +425,33 @@ class Form {
   {
     $this->_generateHoneypotInput();
 
-    $mask   = $this->getHoneypotInputMask();
-    $input  = preg_replace_callback(
-      '/\[\$([^\]]+)\]/si',
-      function($m) {
-        $functionName = 'get' . $m[1];
-        return $this->$functionName();
-      },
-      $mask
-    );
+    if(empty($this->getDrupalForm())) {
+      $mask = $this->getHoneypotInputMask();
+      $input = preg_replace_callback(
+        '/\[\$([^\]]+)\]/si',
+        function ($m) {
+          $functionName = 'get' . $m[1];
+          return $this->$functionName();
+        },
+        $mask
+      );
 
-    if(empty($_SESSION[$this->getMethodSessionVarName()])) {
-      $this->_registerMethod();
+      if (empty($_SESSION[$this->getMethodSessionVarName()])) {
+        $this->_registerMethod();
+      }
+
+      $input = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
+    } else {
+      $input[$this->getHoneypotInputName()]  = [
+        '#type'         => $this->getHoneypotInputType(),
+        '#value'        => '',
+        '#attributes'   => [
+          'id'            => $this->getHoneypotInputName(),
+          'class'         => $this->getHoneypotInputClass(),
+          'autocomplete'  => 'off',
+        ],
+      ];
     }
-
-    $input  = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
 
     return $input;
   }
@@ -440,9 +481,14 @@ class Form {
   {
     $this->_increaseAttemptsCounter();
 
-    return $this->honeypotInput() .
-      $this->tokenInput() .
-      $this->getHoneypotScript();
+    if(empty($this->getDrupalForm())) {
+      $inputs = $this->honeypotInput() .
+        $this->tokenInput() .
+        $this->getHoneypotScript();
+    } else {
+      $inputs = $this->honeypotInput();
+    }
+    return $inputs;
   }
 
 
