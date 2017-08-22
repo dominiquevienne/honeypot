@@ -46,6 +46,21 @@ class yourController {
   }
 }
 ```
+### Drupal 8
+First of all, go to your root directory of your Drupal 8 project and type
+```
+composer require dominiquevienne/honeypot
+```
+In the Form controller (where you build your form), add
+```
+use Dominiquevienne\Honeypot\Form;
+```
+in order to gain access to Honeypot Form constructor.
+
+Instantiate your form using the ``drupalForm`` config array key set to ``TRUE``
+
+Checks are done in the validate function using standard functions. 
+
 ## How it works
 Once the package is installed the honeypot consists in enabling two steps
 ### Form rendering
@@ -120,3 +135,5 @@ Quantity of accepted failures per session before considered as a bot. When the n
 Quantity of accepted attempts per session before considered as a bot. When the number is reached and quantityCheck is ON, every attempt will be considered as a failure during all the session lifetime. 
 #### checks
 Array of checks to be made when submitting form. By default, checks are ```['timeCheck','honeypotCheck','tokenCheck','failureCheck','quantityCheck']```
+#### drupalForm
+If set to ``TRUE``, ``Form::inputs()`` will return a Drupal FAPI array instead of raw HTML
