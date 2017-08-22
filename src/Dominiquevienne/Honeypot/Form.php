@@ -445,8 +445,10 @@ class Form {
 
       $input = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
     } else {
-      $input[$this->getHoneypotInputName()]  = [
-        '#type'         => $this->getHoneypotInputType(),
+      $type = $this->getHoneypotInputType();
+      $type = $this->_drupalType($type);
+      $input[$this->getHoneypotInputName()] = [
+        '#type'         => $type,
         '#value'        => '',
         '#attributes'   => [
           'id'            => $this->getHoneypotInputName(),
@@ -472,8 +474,10 @@ class Form {
         $mask
       );
     } else {
+      $type = $this->getTokenInputType();
+      $type = $this->_drupalType($type);
       $input[$this->getTokenInputName()]  = [
-        '#type'         => $this->getTokenInputType(),
+        '#type'         => $type,
         '#value'        => $this->getTokenInputValue(),
         '#attributes'   => [
           'id'            => $this->getTokenInputName(),
@@ -501,7 +505,6 @@ class Form {
         $this->tokenInput() .
         $this->getHoneypotScript();
     } else {
-      //      $inputs = $this->honeypotInput() + $this->tokenInput() + $this->getHoneypotScript();
       $inputs = $this->honeypotInput() + $this->tokenInput();
     }
     return $inputs;
@@ -583,13 +586,24 @@ class Form {
       't.parentNode.removeChild(t); ' .
       '} ' .
       '</script>';
-    if(!empty($this->getDrupalForm())) {
-      $script['honeypotScript'] = [
-        '#prefix'       => $script,
-        '#value'        => '',
-      ];
-    }
 
     return $script;
+  }
+
+
+  /**
+   * Converts HTML Form types to Drupal Form Types
+   *
+   * @param $type
+   *
+   * @return string
+   */
+  protected function _drupalType($type)
+  {
+    if($type == 'text') {
+      $type = 'textfield';
+    }
+
+    return $type;
   }
 }
