@@ -439,10 +439,6 @@ class Form {
         $mask
       );
 
-      if (empty($_SESSION[$this->getMethodSessionVarName()])) {
-        $this->_registerMethod();
-      }
-
       $input = '<div id="' . $this->getHoneypotInputName() . '_outer">' . $input . '</div>';
     } else {
       $type = $this->getHoneypotInputType();
@@ -456,6 +452,10 @@ class Form {
           'autocomplete'  => 'off',
         ],
       ];
+    }
+
+    if (empty($_SESSION[$this->getMethodSessionVarName()])) {
+      $this->_registerMethod();
     }
 
     return $input;
@@ -507,6 +507,7 @@ class Form {
     } else {
       $inputs = $this->honeypotInput() + $this->tokenInput();
     }
+
     return $inputs;
   }
 
