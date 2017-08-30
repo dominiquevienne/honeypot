@@ -327,8 +327,12 @@ class Form {
    */
   public function getTokenInputValue()
   {
-    $token  = Helpers::generateRandomString(24);
-    $_SESSION[$this->getTokenSessionVarName()]  = $token;
+    if(empty($_SESSION[$this->getTokenSessionVarName()])) {
+      $token  = Helpers::generateRandomString(24);
+      $_SESSION[$this->getTokenSessionVarName()]  = $token;
+    } else {
+      $token  = $_SESSION[$this->getTokenSessionVarName()];
+    }
 
     return $token;
   }
@@ -407,15 +411,19 @@ class Form {
    */
   private function _generateHoneypotInput()
   {
-    $honeypotInputName = $this->getHoneypotInputName();
-    if(empty($honeypotInputName)) {
-      $names  = $this->getHoneypotInputNames();
-      $name   = $names[rand(0, count($names)-1)];
-      $name   .= Helpers::generateRandomString(3);
-      $this->setHoneypotInputName($name);
-    }
+    if(empty($this->getDrupalForm()) OR empty($_SESSION[$this->getTokenInputName()])) {
+      $honeypotInputName = $this->getHoneypotInputName();
+      if (empty($honeypotInputName)) {
+        $names = $this->getHoneypotInputNames();
+        $name = $names[rand(0, count($names) - 1)];
+        $name .= Helpers::generateRandomString(3);
+        $this->setHoneypotInputName($name);
+      }
 
-    $_SESSION[$this->getHoneypotInputSessionVarName()]  = $this->getHoneypotInputName();
+      $_SESSION[$this->getHoneypotInputSessionVarName()] = $this->getHoneypotInputName();
+    } else {
+      $this->setHoneypotInputName($_SESSION[$this->getHoneypotInputSessionVarName()]);
+    }
   }
 
 
@@ -445,7 +453,6 @@ class Form {
       $type = $this->_drupalType($type);
       $input[$this->getHoneypotInputName()] = [
         '#type'         => $type,
-        '#value'        => '',
         '#attributes'   => [
           'id'            => $this->getHoneypotInputName(),
           'class'         => $this->getHoneypotInputClass(),
@@ -476,13 +483,13 @@ class Form {
     } else {
       $type = $this->getTokenInputType();
       $type = $this->_drupalType($type);
-      $input[$this->getTokenInputName()]  = [
-        '#type'         => $type,
-        '#value'        => $this->getTokenInputValue(),
-        '#attributes'   => [
-          'id'            => $this->getTokenInputName(),
-          'class'         => $this->getTokenInputClass(),
-          'autocomplete'  => 'off',
+      $input[$this->getTokenInputName()] = [
+        '#type'           => $type,
+        '#default_value'  => $this->getTokenInputValue(),
+        '#attributes'     => [
+          'id'              => $this->getTokenInputName(),
+          'class'           => $this->getTokenInputClass(),
+          'autocomplete'    => 'off',
         ],
       ];
     }
@@ -505,7 +512,7 @@ class Form {
         $this->tokenInput() .
         $this->getHoneypotScript();
     } else {
-      $inputs = $this->honeypotInput() + $this->tokenInput();
+      $inputs = array_merge($this->honeypotInput(),$this->tokenInput());
     }
 
     return $inputs;
