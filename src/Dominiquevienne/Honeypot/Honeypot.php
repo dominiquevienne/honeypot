@@ -18,19 +18,19 @@ class Honeypot {
   private $_maxFailureAttempts    = 3;
   private $_maxAttempts           = 10;
   private $_checks                = [
-                                      'timeCheck',
-                                      'honeypotCheck',
-                                      'tokenCheck',
-                                      'failureCheck',
-                                      'quantityCheck',
-                                    ];
+    'timeCheck',
+    'honeypotCheck',
+    'tokenCheck',
+    'failureCheck',
+    'quantityCheck',
+  ];
   private $_availableChecks       = [
-                                      'timeCheck',
-                                      'honeypotCheck',
-                                      'tokenCheck',
-                                      'failureCheck',
-                                      'quantityCheck',
-                                    ];
+    'timeCheck',
+    'honeypotCheck',
+    'tokenCheck',
+    'failureCheck',
+    'quantityCheck',
+  ];
   private $_logger;
   private $_logPath               = 'logs/honeypot.logs';
 
@@ -260,9 +260,11 @@ class Honeypot {
     $now  = time();
 
     if(($_SESSION[$form->getTimeCheckSessionVarName()]+$this->getMinFormCompletionTime())>$now) {
-      $this->_increaseFailureCounter();
+      $this->increaseFailureCounter();
+      unset($_SESSION[$form->getTimeCheckSessionVarName()]);
       return FALSE;
     } else {
+      unset($_SESSION[$form->getTimeCheckSessionVarName()]);
       return TRUE;
     }
   }
@@ -282,14 +284,14 @@ class Honeypot {
 
     if($method=='GET') {
       if(!empty($_GET[$inputName])) {
-        $this->_increaseFailureCounter();
+        $this->increaseFailureCounter();
         return FALSE;
       } else {
         return TRUE;
       }
     } elseif($method=='POST') {
       if(!empty($_POST[$inputName])) {
-        $this->_increaseFailureCounter();
+        $this->increaseFailureCounter();
         return FALSE;
       } else {
         return TRUE;
@@ -315,7 +317,7 @@ class Honeypot {
         return TRUE;
       } else {
         $this->_resetToken();
-        $this->_increaseFailureCounter();
+        $this->increaseFailureCounter();
         return FALSE;
       }
     } elseif($method=='POST') {
@@ -324,11 +326,11 @@ class Honeypot {
         return TRUE;
       } else {
         $this->_resetToken();
-        $this->_increaseFailureCounter();
+        $this->increaseFailureCounter();
         return FALSE;
       }
     }
-    $this->_increaseFailureCounter();
+    $this->increaseFailureCounter();
     return FALSE;
   }
 
@@ -374,7 +376,7 @@ class Honeypot {
   {
     $oForm  = new Form();
     if($_SESSION[$oForm->getAttemptsSessionVarName()]>$this->getMaxAttempts()) {
-      $this->_increaseFailureCounter();
+      $this->increaseFailureCounter();
       return FALSE;
     } else {
       return TRUE;
@@ -387,7 +389,7 @@ class Honeypot {
    *
    * @return $this
    */
-  private function _increaseFailureCounter()
+  public function increaseFailureCounter()
   {
     $oForm    = new Form();
 
