@@ -455,7 +455,7 @@ class Form {
         '#type'         => $type,
         '#attributes'   => [
           'id'            => $this->getHoneypotInputName(),
-          'class'         => $this->getHoneypotInputClass(),
+          'class'         => [$this->getHoneypotInputClass()],
           'autocomplete'  => 'off',
         ],
       ];
@@ -488,7 +488,7 @@ class Form {
         '#default_value'  => $this->getTokenInputValue(),
         '#attributes'     => [
           'id'              => $this->getTokenInputName(),
-          'class'           => $this->getTokenInputClass(),
+          'class'           => [$this->getTokenInputClass()],
           'autocomplete'    => 'off',
         ],
       ];
