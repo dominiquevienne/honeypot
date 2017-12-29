@@ -58,6 +58,10 @@ class Honeypot {
       $this->setChecks($config['checks']);
     }
 
+    if(!empty($config['logPath'])) {
+      $this->setLogPath($config['logPath']);
+    }
+
     $this->_logger  = new Logger('honeypotLogger');
     $this->_logger->pushHandler(new StreamHandler($this->getLogPath()));
   }
